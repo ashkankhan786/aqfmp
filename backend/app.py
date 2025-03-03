@@ -8,7 +8,7 @@ from collections import defaultdict
 from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, origins=["http://localhost:5173"]) # Enable CORS for all routes
 
 # Load trained model
 model_path = os.path.join(os.getcwd(),"best_cnn_model.keras")
@@ -119,4 +119,5 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
