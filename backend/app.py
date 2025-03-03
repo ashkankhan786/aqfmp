@@ -5,8 +5,10 @@ import numpy as np
 import requests
 from datetime import datetime
 from collections import defaultdict
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Load trained model
 model_path = os.path.join(os.getcwd(), "backend", "best_cnn_model.keras")
@@ -37,6 +39,7 @@ def fetch_forecast_pm25(lat, lon):
     return {}
 
 # Function to calculate AQI, category, and warning
+# Function to calculate AQI, category, and warning
 def calculate_aqi_and_warning(pm25):
     breakpoints = [
         (0, 30, 0, 50, "Good", "Satisfactory air quality.", "green"),
@@ -49,8 +52,9 @@ def calculate_aqi_and_warning(pm25):
     for low_pm, high_pm, low_aqi, high_aqi, category, warning, color in breakpoints:
         if low_pm <= pm25 <= high_pm:
             aqi = (high_aqi - low_aqi) / (high_pm - low_pm) * (pm25 - low_pm) + low_aqi
-            return round(aqi), category, warning, color
-    return None, "Out of Range", "PM2.5 level is beyond measurable limits.", "gray"
+            return round(aqi) if aqi is not None else 0, category, warning, color
+    return 0, "Out of Range", "PM2.5 level is beyond measurable limits.", "gray"
+
 
 # Function to predict PM2.5
 def predict_pm25(historical_data):
@@ -74,9 +78,12 @@ def predict_pm25(historical_data):
 @app.route('/')
 def index():
     return render_template('index.html')
+
 @app.route('/result')
 def result():
     return render_template('result.html')
+
+@app.route('/predict', methods=['POST'])
 @app.route('/predict', methods=['POST'])
 def predict():
     city_name = request.json.get("city")  # Fetch city from request
@@ -96,11 +103,11 @@ def predict():
     predictions = predict_pm25(historical_data)
 
     return jsonify({
-        "city": city_name,  # Fixed the incorrect variable reference
+        "city": city_name,
         "predictions": [
             {
                 "pm25": float(item["pm25"]),
-                "aqi": int(item["aqi"]),
+                "aqi": int(item["aqi"]) if item["aqi"] is not None else 0,
                 "category": item["category"],
                 "warning": item["warning"],
                 "color": item["color"]
@@ -108,6 +115,7 @@ def predict():
             for item in predictions
         ]
     })
+
 
 if __name__ == '__main__':
     app.run(debug=True)
