@@ -11,7 +11,8 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Load trained model
-model_path = os.path.join(os.getcwd(), "backend", "best_cnn_model.keras")
+model_path = os.path.join(os.getcwd(),"best_cnn_model.keras")
+print(model_path)
 best_cnn_model = load_model(model_path)
 
 api_key = '701cf10ad3df9b6f5f58f40bfba7e837'
