@@ -11,9 +11,13 @@ app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"]) # Enable CORS for all routes
 
 # Load trained model
-model_path = os.path.join(os.getcwd(),"best_cnn_model.keras")
-print(model_path)
+model_path = os.path.join(os.getcwd(), "best_cnn_model.keras")
+print(f"Checking model path: {model_path}")
+if not os.path.exists(model_path):
+    print(f"Model not found at {model_path}")
+    exit(1)  # Stop the app if model is missing
 best_cnn_model = load_model(model_path)
+
 
 api_key = '701cf10ad3df9b6f5f58f40bfba7e837'
 
@@ -75,6 +79,10 @@ def predict_pm25(historical_data):
         sequence = np.roll(sequence, shift=-1, axis=1)
         sequence[0, -1, 0] = pred
     return predictions
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "up"}), 200
 
 @app.route('/')
 def index():
