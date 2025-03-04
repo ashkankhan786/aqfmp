@@ -8,7 +8,7 @@ from collections import defaultdict
 from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"]) # Enable CORS for all routes
+CORS(app) # Enable CORS for all routes
 
 # Load trained model
 model_path = os.path.join(os.getcwd(), "best_cnn_model.keras")
